@@ -8,8 +8,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.validation.BeanPropertyBindingResult;
 
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -67,7 +70,7 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attribute("errors", blankItemNameErrors))
+                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
         ;
         //given
         HashMap<String, String> exceedPriceErrors = new HashMap<>();
@@ -79,7 +82,7 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attribute("errors", exceedPriceErrors))
+                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
         ;
         //when-then exceedPrice
         mvc.perform(post("/validation/v2/items/add")
@@ -88,7 +91,7 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attribute("errors", exceedPriceErrors))
+                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
         ;
         //given
         HashMap<String, String> exceedQuantityErrors = new HashMap<>();
@@ -100,7 +103,7 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attribute("errors", exceedQuantityErrors))
+                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
         ;
     }
 
