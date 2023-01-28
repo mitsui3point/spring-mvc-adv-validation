@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(value = {ValidationItemControllerV1.class})
+@WebMvcTest(value = {ValidationItemControllerV2.class})
 public class ValidationItemControllerV2Test {
     @Autowired
     private MockMvc mvc;
@@ -32,7 +32,7 @@ public class ValidationItemControllerV2Test {
         //when
         when(itemRepository.save(saveItem))
                 .thenReturn(saveItem);
-        ResultActions perform = mvc.perform(post("/validation/v1/items/add")
+        ResultActions perform = mvc.perform(post("/validation/v2/items/add")
                 .param("itemName", "item1")
                 .param("price", "1000")
                 .param("quantity", "10")
@@ -41,7 +41,7 @@ public class ValidationItemControllerV2Test {
         //then
         perform.andDo(print())
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/validation/v1/items/1?status=true"))
+                .andExpect(redirectedUrl("/validation/v2/items/1?status=true"))
         ;
     }
 
@@ -61,45 +61,45 @@ public class ValidationItemControllerV2Test {
         HashMap<String, String> blankItemNameErrors = new HashMap<>();
         blankItemNameErrors.put("itemName", "상품 이름은 필수입니다.");
         //when-then blank
-        mvc.perform(post("/validation/v1/items/add")
+        mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("price", "1000").param("quantity", "100")
                         .param("itemName", "")
                 ).andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(view().name("validation/v1/addForm"))
+                .andExpect(view().name("validation/v2/addForm"))
                 .andExpect(model().attribute("errors", blankItemNameErrors))
         ;
         //given
         HashMap<String, String> exceedPriceErrors = new HashMap<>();
         exceedPriceErrors.put("price", "가격은 1,000 ~ 1,000,000 까지 허용됩니다.");
         //when-then lowerPrice
-        mvc.perform(post("/validation/v1/items/add")
+        mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1").param("quantity", "100")
                         .param("price", "999")
                 ).andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(view().name("validation/v1/addForm"))
+                .andExpect(view().name("validation/v2/addForm"))
                 .andExpect(model().attribute("errors", exceedPriceErrors))
         ;
         //when-then exceedPrice
-        mvc.perform(post("/validation/v1/items/add")
+        mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1").param("quantity", "10")
                         .param("price", "1000001")
                 ).andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(view().name("validation/v1/addForm"))
+                .andExpect(view().name("validation/v2/addForm"))
                 .andExpect(model().attribute("errors", exceedPriceErrors))
         ;
         //given
         HashMap<String, String> exceedQuantityErrors = new HashMap<>();
         exceedQuantityErrors.put("quantity", "수량은 최대 9,999 까지 허용됩니다.");
         //when-then exceedQuantity
-        mvc.perform(post("/validation/v1/items/add")
+        mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1").param("price", "2000")
                         .param("quantity", "10000")
                 ).andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(view().name("validation/v1/addForm"))
+                .andExpect(view().name("validation/v2/addForm"))
                 .andExpect(model().attribute("errors", exceedQuantityErrors))
         ;
     }
@@ -111,23 +111,23 @@ public class ValidationItemControllerV2Test {
         nullErrors.put("price", "가격은 1,000 ~ 1,000,000 까지 허용됩니다.");
         nullErrors.put("quantity", "수량은 최대 9,999 까지 허용됩니다.");
         //when-then blank
-        mvc.perform(post("/validation/v1/items/add")
+        mvc.perform(post("/validation/v2/items/add")
                                 .param("id", "1").param("itemName", "item1")
                 ).andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(view().name("validation/v1/addForm"))
+                .andExpect(view().name("validation/v2/addForm"))
                 .andExpect(model().attribute("errors", nullErrors))
         ;
         //given
         HashMap<String, String> errors = new HashMap<>();
         errors.put("globalError", "가격 * 수량의 합은 10,000 이상이어야 합니다. 현재 값 = " + 1000 * 1);
         //when-then blank
-        mvc.perform(post("/validation/v1/items/add")
+        mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1")
                         .param("price", "1000").param("quantity", "1")
                 ).andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(view().name("validation/v1/addForm"))
+                .andExpect(view().name("validation/v2/addForm"))
                 .andExpect(model().attribute("errors", errors))
         ;
     }
