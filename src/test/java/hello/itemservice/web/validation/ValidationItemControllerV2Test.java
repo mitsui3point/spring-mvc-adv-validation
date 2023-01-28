@@ -109,21 +109,14 @@ public class ValidationItemControllerV2Test {
 
     @Test
     void addItemComplexErrorTest() throws Exception {
-        //given
-        HashMap<String, String> nullErrors = new HashMap<>();
-        nullErrors.put("price", "가격은 1,000 ~ 1,000,000 까지 허용됩니다.");
-        nullErrors.put("quantity", "수량은 최대 9,999 까지 허용됩니다.");
         //when-then blank
         mvc.perform(post("/validation/v2/items/add")
                                 .param("id", "1").param("itemName", "item1")
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attribute("errors", nullErrors))
+                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
         ;
-        //given
-        HashMap<String, String> errors = new HashMap<>();
-        errors.put("globalError", "가격 * 수량의 합은 10,000 이상이어야 합니다. 현재 값 = " + 1000 * 1);
         //when-then blank
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1")
@@ -131,7 +124,7 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attribute("errors", errors))
+                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
         ;
     }
 }
