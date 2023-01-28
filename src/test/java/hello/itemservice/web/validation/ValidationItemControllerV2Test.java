@@ -60,9 +60,6 @@ public class ValidationItemControllerV2Test {
      */
     @Test
     void addItemFieldErrorTest() throws Exception {
-        //given
-        HashMap<String, String> blankItemNameErrors = new HashMap<>();
-        blankItemNameErrors.put("itemName", "상품 이름은 필수입니다.");
         //when-then blank
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("price", "1000").param("quantity", "100")
@@ -70,11 +67,8 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
+                .andExpect(model().attributeHasFieldErrors("item", "itemName"))
         ;
-        //given
-        HashMap<String, String> exceedPriceErrors = new HashMap<>();
-        exceedPriceErrors.put("price", "가격은 1,000 ~ 1,000,000 까지 허용됩니다.");
         //when-then lowerPrice
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1").param("quantity", "100")
@@ -82,7 +76,7 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
+                .andExpect(model().attributeHasFieldErrors("item", "price"))
         ;
         //when-then exceedPrice
         mvc.perform(post("/validation/v2/items/add")
@@ -91,11 +85,8 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
+                .andExpect(model().attributeHasFieldErrors("item", "price"))
         ;
-        //given
-        HashMap<String, String> exceedQuantityErrors = new HashMap<>();
-        exceedQuantityErrors.put("quantity", "수량은 최대 9,999 까지 허용됩니다.");
         //when-then exceedQuantity
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1").param("price", "2000")
@@ -103,7 +94,7 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
+                .andExpect(model().attributeHasFieldErrors("item", "quantity"))
         ;
     }
 
@@ -115,6 +106,7 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
+                .andExpect(model().attributeHasErrors("item"))
                 .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
         ;
         //when-then blank
@@ -124,7 +116,20 @@ public class ValidationItemControllerV2Test {
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
-                .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
+                .andExpect(model().attributeHasErrors("item"))
+        ;
+    }
+
+    @Test
+    void addItemBindingFailureTest() throws Exception {
+        //when-then blank
+        mvc.perform(post("/validation/v2/items/add")
+                        .param("id", "1").param("itemName", "item1")
+                        .param("price", "qqq").param("quantity", "1000")
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(view().name("validation/v2/addForm"))
+                .andExpect(model().attributeHasFieldErrors("item", "price"))
         ;
     }
 }
