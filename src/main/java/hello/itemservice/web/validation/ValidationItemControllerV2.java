@@ -208,6 +208,17 @@ public class ValidationItemControllerV2 {
         //검증 실패시 다시 입력 폼으로
         if (bindingResult.hasErrors()) {
             log.info("errors = {}", bindingResult);
+            /*
+            Field error in object 'item' on field 'itemName': rejected value [];
+                codes [required.item.itemName,required.itemName,required.java.lang.String,required];
+                arguments []; default message [null]
+            Field error in object 'item' on field 'price': rejected value [null];
+                codes [range.item.price,range.price,range.java.lang.Integer,range];
+                arguments [1000,1000000]; default message [null]
+            Field error in object 'item' on field 'quantity': rejected value [null];
+                codes [max.item.quantity,max.quantity,max.java.lang.Integer,max];
+                arguments [9999]; default message [null]
+            * */
             return "validation/v2/addForm";
         }
 
