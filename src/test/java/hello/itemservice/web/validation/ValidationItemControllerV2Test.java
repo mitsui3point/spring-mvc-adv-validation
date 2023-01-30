@@ -2,14 +2,18 @@ package hello.itemservice.web.validation;
 
 import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -21,6 +25,15 @@ public class ValidationItemControllerV2Test {
 
     @MockBean
     private ItemRepository itemRepository;
+
+    @MockBean
+    private ItemValidator itemValidator;
+
+    @BeforeEach
+    void setUp() {
+        //https://www.baeldung.com/mockito-void-methods#partial-mocking
+        doCallRealMethod().when(itemValidator).validate(isA(Item.class), isA(BeanPropertyBindingResult.class));
+    }
 
     @Test
     void addItemTest() throws Exception {
@@ -57,7 +70,7 @@ public class ValidationItemControllerV2Test {
     void addItemFieldErrorTest() throws Exception {
         //when-then blank
         mvc.perform(post("/validation/v2/items/add")
-                        .param("id", "1").param("price", "1000").param("quantity", "100")
+                        .param("id", "1").param("price", "1000").param("quantity", "100")//valid
                         .param("itemName", "")
                 ).andDo(print())
                 .andExpect(status().isOk())
