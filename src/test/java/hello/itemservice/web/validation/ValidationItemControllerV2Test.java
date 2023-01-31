@@ -4,13 +4,23 @@ import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.mock.mockito.SpyBeans;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
@@ -18,21 +28,28 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(value = {ValidationItemControllerV2.class})
+@WebMvcTest
 public class ValidationItemControllerV2Test {
-    @Autowired
     private MockMvc mvc;
 
-    @MockBean
-    private ItemRepository itemRepository;
-
-    @MockBean
+    /**
+     * {@code SpyBean} : https://kth990303.tistory.com/370
+     */
+    @SpyBean
     private ItemValidator itemValidator;
+
+    @SpyBean
+    private ItemRepository itemRepository;
 
     @BeforeEach
     void setUp() {
-        //https://www.baeldung.com/mockito-void-methods#partial-mocking
-        doCallRealMethod().when(itemValidator).validate(isA(Item.class), isA(BeanPropertyBindingResult.class));
+        /**
+         * https://stackoverflow.com/questions/61224791/mockbean-not-initializing-service-bean-when-using-mockmvc-standalonesetup
+         */
+        mvc = MockMvcBuilders
+                .standaloneSetup(new ValidationItemControllerV2(itemRepository, itemValidator))
+                .setValidator(itemValidator)
+                .build();
     }
 
     @Test
@@ -41,8 +58,6 @@ public class ValidationItemControllerV2Test {
         Item saveItem = new Item("item1", 1000, 10);
         saveItem.setId(1L);
         //when
-        when(itemRepository.save(saveItem))
-                .thenReturn(saveItem);
         ResultActions perform = mvc.perform(post("/validation/v2/items/add")
                 .param("itemName", "item1")
                 .param("price", "1000")
@@ -110,7 +125,7 @@ public class ValidationItemControllerV2Test {
     void addItemComplexErrorTest() throws Exception {
         //when-then blank
         mvc.perform(post("/validation/v2/items/add")
-                                .param("id", "1").param("itemName", "item1")
+                        .param("id", "1").param("itemName", "item1")
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
