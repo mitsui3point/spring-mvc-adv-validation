@@ -8,7 +8,8 @@ import org.springframework.context.NoSuchMessageException;
 
 import java.util.Locale;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 public class MessageSourceTest {
