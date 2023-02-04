@@ -55,6 +55,15 @@ public class ValidationItemControllerV3 {
                             BindingResult bindingResult,
                             RedirectAttributes redirectAttributes) {
 
+        //특정 필드가 아닌 복합 룰 검증
+        //: @ScriptAssert 는 item 객체 외에 복합조건이 들어갈 시 핸들링이 어렵기 때문에 컨트롤러에서 직접 처리가 더 유연하다.
+        if (item.getQuantity() != null && item.getPrice() != null) {
+            int resultPrice = item.getPrice() * item.getQuantity();
+            if (resultPrice < 10000) {
+                bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
+            }
+        }
+
         //검증 실패시 다시 입력 폼으로
         if (bindingResult.hasErrors()) {
             log.info("errors = {}", bindingResult);

@@ -130,18 +130,18 @@ public class ValidationItemControllerV3Test {
                 .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
         ;
     }
-//    @Test
-//    void addItemComplexErrorTest() throws Exception {
-//        //when-then blank
-//        mvc.perform(post("/validation/v3/items/add")
-//                        .param("id", "1").param("itemName", "item1")
-//                        .param("price", "1000").param("quantity", "1")
-//                ).andDo(print())
-//                .andExpect(status().isOk())
-//                .andExpect(view().name("validation/v3/addForm"))
-//                .andExpect(model().attributeHasErrors("item"))
-//        ;
-//    }
+    @Test
+    void addItemComplexErrorTest() throws Exception {
+        //when-then blank
+        mvc.perform(post("/validation/v3/items/add")
+                        .param("id", "1").param("itemName", "item1")
+                        .param("price", "1000").param("quantity", "1")
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(view().name("validation/v3/addForm"))
+                .andExpect(model().attributeHasErrors("item"))
+        ;
+    }
 
     @Test
     void addItemBindingFailureTest() throws Exception {
