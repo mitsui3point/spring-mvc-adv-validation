@@ -5,7 +5,9 @@ import hello.itemservice.domain.item.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -14,26 +16,22 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest
+@WebMvcTest(controllers = {ValidationItemControllerV3.class})
 public class ValidationItemControllerV3Test {
     private MockMvc mvc;
-
-    @SpyBean
-    private ItemValidator itemValidator;
-
     @SpyBean
     private ItemRepository itemRepository;
 
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders
-                .standaloneSetup(new ValidationItemControllerV3(itemRepository, itemValidator))
-                .setValidator(itemValidator)
+                .standaloneSetup(new ValidationItemControllerV3(itemRepository))
                 .build();
     }
 
     @Test
     void addItemTest() throws Exception {
+
         //given
         Item saveItem = new Item("item1", 1000, 10);
         saveItem.setId(1L);

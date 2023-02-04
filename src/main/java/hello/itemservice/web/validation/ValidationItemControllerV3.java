@@ -4,14 +4,15 @@ import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -21,13 +22,6 @@ import java.util.List;
 public class ValidationItemControllerV3 {
 
     private final ItemRepository itemRepository;
-    private final ItemValidator itemValidator;
-
-    @InitBinder
-    private void init(WebDataBinder dataBinder) {
-        log.info("dataBinder = {}", dataBinder);
-        dataBinder.addValidators(itemValidator);
-    }
 
     @GetMapping
     public String items(Model model) {
@@ -50,8 +44,15 @@ public class ValidationItemControllerV3 {
         return "validation/v3/addForm";
     }
 
+    /**
+     * {@link ValidationAutoConfiguration#defaultValidator()} :
+     * 스프링 부트는 자동으로 글로벌 Validator로 등록한다.
+     * LocalValidatorFactoryBean 을 글로벌 Validator로 등록한다.
+     * 이 Validator는 @NotNull 같은 애노테이션을 보고 검증을 수행한다.
+     * 이렇게 글로벌 Validator가 적용되어 있기 때문에, @Valid, @Validated 만 적용하면 된다.
+     */
     @PostMapping("/add")
-    public String addItemV6(@Validated @ModelAttribute Item item,
+    public String addItem(@Valid @ModelAttribute Item item,
                             BindingResult bindingResult,
                             RedirectAttributes redirectAttributes) {
 
