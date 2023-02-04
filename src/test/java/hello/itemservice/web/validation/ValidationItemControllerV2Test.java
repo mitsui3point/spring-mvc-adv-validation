@@ -4,17 +4,21 @@ import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest
+@WebMvcTest(controllers = {ValidationItemControllerV2.class})
 public class ValidationItemControllerV2Test {
     private MockMvc mvc;
 
@@ -24,7 +28,7 @@ public class ValidationItemControllerV2Test {
     @SpyBean
     private ItemValidator itemValidator;
 
-    @SpyBean
+    @MockBean
     private ItemRepository itemRepository;
 
     @BeforeEach
@@ -43,6 +47,7 @@ public class ValidationItemControllerV2Test {
         //given
         Item saveItem = new Item("item1", 1000, 10);
         saveItem.setId(1L);
+        Mockito.when(itemRepository.save(saveItem)).thenReturn(saveItem);
         //when
         ResultActions perform = mvc.perform(post("/validation/v2/items/add")
                 .param("itemName", "item1")
@@ -68,16 +73,19 @@ public class ValidationItemControllerV2Test {
      * <br>가격 * 수량의 합은 10,000원 이상
      */
     @Test
-    void addItemFieldErrorTest() throws Exception {
+    void addItemFieldBlankErrorTest() throws Exception {
         //when-then blank
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("price", "1000").param("quantity", "100")//valid
-                        .param("itemName", "")
+                        .param("itemName", " ")
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v2/addForm"))
                 .andExpect(model().attributeHasFieldErrors("item", "itemName"))
         ;
+    }
+    @Test
+    void addItemMinPriceErrorTest() throws Exception {
         //when-then lowerPrice
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1").param("quantity", "100")
@@ -87,6 +95,9 @@ public class ValidationItemControllerV2Test {
                 .andExpect(view().name("validation/v2/addForm"))
                 .andExpect(model().attributeHasFieldErrors("item", "price"))
         ;
+    }
+    @Test
+    void addItemFieldMaxPriceErrorTest() throws Exception {
         //when-then exceedPrice
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1").param("quantity", "10")
@@ -96,6 +107,9 @@ public class ValidationItemControllerV2Test {
                 .andExpect(view().name("validation/v2/addForm"))
                 .andExpect(model().attributeHasFieldErrors("item", "price"))
         ;
+    }
+    @Test
+    void addItemFieldMaxQuantityErrorTest() throws Exception {
         //when-then exceedQuantity
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1").param("price", "2000")
@@ -108,7 +122,7 @@ public class ValidationItemControllerV2Test {
     }
 
     @Test
-    void addItemComplexErrorTest() throws Exception {
+    void addItemNullErrorTest() throws Exception {
         //when-then blank
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1")
@@ -118,6 +132,9 @@ public class ValidationItemControllerV2Test {
                 .andExpect(model().attributeHasErrors("item"))
                 .andExpect(model().attributeExists("org.springframework.validation.BindingResult.item"))
         ;
+    }
+    @Test
+    void addItemComplexErrorTest() throws Exception {
         //when-then blank
         mvc.perform(post("/validation/v2/items/add")
                         .param("id", "1").param("itemName", "item1")

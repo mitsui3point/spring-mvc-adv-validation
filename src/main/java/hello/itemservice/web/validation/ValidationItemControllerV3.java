@@ -12,7 +12,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -52,7 +51,7 @@ public class ValidationItemControllerV3 {
      * 이렇게 글로벌 Validator가 적용되어 있기 때문에, @Valid, @Validated 만 적용하면 된다.
      */
     @PostMapping("/add")
-    public String addItem(@Valid @ModelAttribute Item item,
+    public String addItem(@Validated @ModelAttribute Item item,
                             BindingResult bindingResult,
                             RedirectAttributes redirectAttributes) {
 
