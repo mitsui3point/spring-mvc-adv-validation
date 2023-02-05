@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -17,14 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = {ValidationItemControllerV3.class})
-public class ValidationItemControllerV3Test {
+public class ValidationItemControllerV3AddTest {
     private MockMvc mvc;
-
-    /**
-     * {@code SpyBean} : https://kth990303.tistory.com/370
-     */
-    @SpyBean
-    private ItemValidator itemValidator;
 
     @MockBean
     private ItemRepository itemRepository;
@@ -155,4 +148,5 @@ public class ValidationItemControllerV3Test {
                 .andExpect(model().attributeHasFieldErrors("item", "price"))
         ;
     }
+
 }
