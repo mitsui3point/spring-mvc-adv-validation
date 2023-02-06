@@ -11,7 +11,7 @@ public class ItemUpdateForm {
     @NotNull
     private Long id;
 
-    @NotBlank(message = "상품이름에는 공백이 포함될 수 없습니다. {0}")
+    @NotBlank
     private String itemName;
 
     @NotNull
