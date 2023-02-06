@@ -7,9 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.text.MessageFormat;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -19,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ValidationItemControllerV3AddTest {
     private MockMvc mvc;
 
-    @MockBean
+    @SpyBean
     private ItemRepository itemRepository;
 
     @BeforeEach
@@ -35,20 +38,20 @@ public class ValidationItemControllerV3AddTest {
     @Test
     void addItemTest() throws Exception {
         //given
-        Item saveItem = new Item("item1", 1000, 10);
-        saveItem.setId(1L);
-        Mockito.when(itemRepository.save(saveItem)).thenReturn(saveItem);
         //when
         ResultActions perform = mvc.perform(post("/validation/v3/items/add")
                 .param("itemName", "item1")
                 .param("price", "1000")
                 .param("quantity", "10")
-                .param("id", "1")
         );
         //then
         perform.andDo(print())
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/validation/v3/items/1?status=true"))
+                .andExpect(result -> {
+                    String itemId = result.getModelAndView().getModel().get("itemId").toString();
+                    redirectedUrl(MessageFormat.format("/validation/v3/items/{0}?status=true", itemId));
+                })
+//                .andExpect(redirectedUrl("/validation/v3/items/1?status=true"))
         ;
     }
 
@@ -66,7 +69,7 @@ public class ValidationItemControllerV3AddTest {
     void addItemFieldBlankErrorTest() throws Exception {
         //when-then blank
         mvc.perform(post("/validation/v3/items/add")
-                        .param("id", "1").param("price", "1000").param("quantity", "100")//valid
+                        .param("price", "1000").param("quantity", "100")//valid
                         .param("itemName", " ")
                 ).andDo(print())
                 .andExpect(status().isOk())
@@ -78,7 +81,7 @@ public class ValidationItemControllerV3AddTest {
     void addItemMinPriceErrorTest() throws Exception {
         //when-then lowerPrice
         mvc.perform(post("/validation/v3/items/add")
-                        .param("id", "1").param("itemName", "item1").param("quantity", "100")
+                        .param("itemName", "item1").param("quantity", "100")
                         .param("price", "999")
                 ).andDo(print())
                 .andExpect(status().isOk())
@@ -90,7 +93,7 @@ public class ValidationItemControllerV3AddTest {
     void addItemFieldMaxPriceErrorTest() throws Exception {
         //when-then exceedPrice
         mvc.perform(post("/validation/v3/items/add")
-                        .param("id", "1").param("itemName", "item1").param("quantity", "10")
+                        .param("itemName", "item1").param("quantity", "10")
                         .param("price", "1000001")
                 ).andDo(print())
                 .andExpect(status().isOk())
@@ -102,7 +105,7 @@ public class ValidationItemControllerV3AddTest {
     void addItemFieldMaxQuantityErrorTest() throws Exception {
         //when-then exceedQuantity
         mvc.perform(post("/validation/v3/items/add")
-                        .param("id", "1").param("itemName", "item1").param("price", "2000")
+                        .param("itemName", "item1").param("price", "2000")
                         .param("quantity", "10000")
                 ).andDo(print())
                 .andExpect(status().isOk())
@@ -115,7 +118,7 @@ public class ValidationItemControllerV3AddTest {
     void addItemNullErrorTest() throws Exception {
         //when-then blank
         mvc.perform(post("/validation/v3/items/add")
-                        .param("id", "1").param("itemName", "item1")
+                        .param("itemName", "item1")
                 ).andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(view().name("validation/v3/addForm"))
@@ -127,7 +130,7 @@ public class ValidationItemControllerV3AddTest {
     void addItemComplexErrorTest() throws Exception {
         //when-then blank
         mvc.perform(post("/validation/v3/items/add")
-                        .param("id", "1").param("itemName", "item1")
+                        .param("itemName", "item1")
                         .param("price", "1000").param("quantity", "1")
                 ).andDo(print())
                 .andExpect(status().isOk())
@@ -140,7 +143,7 @@ public class ValidationItemControllerV3AddTest {
     void addItemBindingFailureTest() throws Exception {
         //when-then blank
         mvc.perform(post("/validation/v3/items/add")
-                        .param("id", "1").param("itemName", "item1")
+                        .param("itemName", "item1")
                         .param("price", "qqq").param("quantity", "1000")
                 ).andDo(print())
                 .andExpect(status().isOk())

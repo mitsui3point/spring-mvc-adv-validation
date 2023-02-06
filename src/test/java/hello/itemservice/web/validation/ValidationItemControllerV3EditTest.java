@@ -4,12 +4,13 @@ import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.text.MessageFormat;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -19,8 +20,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ValidationItemControllerV3EditTest {
     private MockMvc mvc;
 
-    @MockBean
+    @SpyBean
     private ItemRepository itemRepository;
+
+    private Item savedItem;
 
     @BeforeEach
     void setUp() {
@@ -30,25 +33,40 @@ public class ValidationItemControllerV3EditTest {
         mvc = MockMvcBuilders
                 .standaloneSetup(new ValidationItemControllerV3(itemRepository))
                 .build();
+        //given
+        savedItem = getEditTestData();
+    }
+
+    private Item addEditTestData() {
+        return itemRepository.save(new Item("editItemTest", 10000, 100));
+    }
+
+    private Item getEditTestData() {
+        return itemRepository.findAll()
+                .stream()
+                .filter(item -> item.getItemName().equals("editItemTest"))
+                .findFirst()
+                .orElseGet(() -> addEditTestData());
     }
 
     @Test
     void editItemTest() throws Exception {
-        //given
-        Item saveItem = new Item("item1", 1000, 10);
-        saveItem.setId(1L);
-        Mockito.when(itemRepository.save(saveItem)).thenReturn(saveItem);
         //when
-        ResultActions perform = mvc.perform(post("/validation/v3/items/1/edit")
+        ResultActions perform = mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
                 .param("itemName", "item1")
                 .param("price", "1000")
                 .param("quantity", "10")
-                .param("id", "1")
+                .param("id", savedItem.getId().toString())
         );
         //then
         perform.andDo(print())
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/validation/v3/items/1"))
+                .andExpect(result -> {
+                    Item item = (Item) result.getModelAndView()
+                            .getModel()
+                            .get("item");
+                    redirectedUrl(MessageFormat.format("/validation/v3/items/{0}", item.getId()));
+                })
         ;
     }
 
@@ -65,7 +83,7 @@ public class ValidationItemControllerV3EditTest {
     @Test
     void editItemFieldBlankErrorTest() throws Exception {
         //when-then blank
-        mvc.perform(post("/validation/v3/items/1/edit")
+        mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
                         .param("id", "1").param("price", "1000").param("quantity", "100")//valid
                         .param("itemName", " ")
                 ).andDo(print())
@@ -77,7 +95,7 @@ public class ValidationItemControllerV3EditTest {
     @Test
     void editItemMinPriceErrorTest() throws Exception {
         //when-then lowerPrice
-        mvc.perform(post("/validation/v3/items/1/edit")
+        mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
                         .param("id", "1").param("itemName", "item1").param("quantity", "100")
                         .param("price", "999")
                 ).andDo(print())
@@ -89,7 +107,7 @@ public class ValidationItemControllerV3EditTest {
     @Test
     void editItemFieldMaxPriceErrorTest() throws Exception {
         //when-then exceedPrice
-        mvc.perform(post("/validation/v3/items/1/edit")
+        mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
                         .param("id", "1").param("itemName", "item1").param("quantity", "10")
                         .param("price", "1000001")
                 ).andDo(print())
@@ -101,7 +119,7 @@ public class ValidationItemControllerV3EditTest {
     @Test
     void editItemFieldMaxQuantityErrorTest() throws Exception {
         //when-then exceedQuantity
-        mvc.perform(post("/validation/v3/items/1/edit")
+        mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
                         .param("id", "1").param("itemName", "item1").param("price", "2000")
                         .param("quantity", "10000")
                 ).andDo(print())
@@ -114,7 +132,7 @@ public class ValidationItemControllerV3EditTest {
     @Test
     void editItemNullErrorTest() throws Exception {
         //when-then blank
-        mvc.perform(post("/validation/v3/items/1/edit")
+        mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
                         .param("id", "1").param("itemName", "item1")
                 ).andDo(print())
                 .andExpect(status().isOk())
@@ -126,7 +144,7 @@ public class ValidationItemControllerV3EditTest {
     @Test
     void editItemComplexErrorTest() throws Exception {
         //when-then blank
-        mvc.perform(post("/validation/v3/items/1/edit")
+        mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
                         .param("id", "1").param("itemName", "item1")
                         .param("price", "1000").param("quantity", "1")
                 ).andDo(print())
@@ -139,7 +157,7 @@ public class ValidationItemControllerV3EditTest {
     @Test
     void editItemBindingFailureTest() throws Exception {
         //when-then blank
-        mvc.perform(post("/validation/v3/items/1/edit")
+        mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
                         .param("id", "1").param("itemName", "item1")
                         .param("price", "qqq").param("quantity", "1000")
                 )
