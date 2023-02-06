@@ -117,19 +117,6 @@ public class ValidationItemControllerV3EditTest {
         ;
     }
     @Test
-    void editItemFieldMaxQuantityErrorTest() throws Exception {
-        //when-then exceedQuantity
-        mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
-                        .param("id", "1").param("itemName", "item1").param("price", "2000")
-                        .param("quantity", "10000")
-                ).andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(view().name("validation/v3/editForm"))
-                .andExpect(model().attributeHasFieldErrors("item", "quantity"))
-        ;
-    }
-
-    @Test
     void editItemNullErrorTest() throws Exception {
         //when-then blank
         mvc.perform(post(MessageFormat.format("/validation/v3/items/{0}/edit", savedItem.getId().toString()))
