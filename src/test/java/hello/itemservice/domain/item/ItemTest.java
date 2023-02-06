@@ -14,6 +14,7 @@ import java.util.Set;
  : 공식 사이트: http://hibernate.org/validator/
  : 공식 메뉴얼: https://docs.jboss.org/hibernate/validator/6.2/reference/en-US/html_single/
  : 검증 애노테이션 모음: https://docs.jboss.org/hibernate/validator/6.2/reference/en-US/html_single/#validator-defineconstraints-spec
+ : validation @Test 예시: https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/?v=8.0#_validating_constraints
  */
 public class ItemTest {
     @Test
