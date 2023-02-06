@@ -2,6 +2,7 @@ package hello.itemservice.web.validation;
 
 import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
+import hello.itemservice.web.validation.form.ItemUpdateForm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -62,10 +63,10 @@ public class ValidationItemControllerV4EditTest {
         perform.andDo(print())
                 .andExpect(status().is3xxRedirection())
                 .andExpect(result -> {
-                    Item item = (Item) result.getModelAndView()
+                    ItemUpdateForm form = (ItemUpdateForm) result.getModelAndView()
                             .getModel()
                             .get("item");
-                    redirectedUrl(MessageFormat.format("/validation/v4/items/{0}", item.getId()));
+                    redirectedUrl(MessageFormat.format("/validation/v4/items/{0}", form.getId()));
                 })
         ;
     }
